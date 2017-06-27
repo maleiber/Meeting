@@ -32,7 +32,11 @@ public interface Itest extends Remote{
 	public String showpassedall()throws RemoteException;//JSONArray
 	
 	public boolean deletestaff(int staffid)throws RemoteException;
-	public String searchstaff(String staff_name)throws RemoteException;//JSONArray
+	public boolean deletestaffcopy(int staffid)throws RemoteException;
+	public String searchstaffbyname(String staff_name)throws RemoteException;//JSONArray
+	public String searchstaffbyusername(String staff_name)throws RemoteException;//JSONArray
+	public String searchstaffbydepartment(int departmentid)throws RemoteException;//JSONArray
+	
 	public String searchMeeting(Map<String, Object> map)throws RemoteException;//JSONArray
 	public String searchMeeting(
 			String meeting_name,String meeting_notes,
