@@ -98,7 +98,6 @@ $(document).ready(function () {
                 }
             },
             username: {
-                threshold:6,
                 trigger:'blur',
                 message: 'The username is not valid',
                 validators: {
