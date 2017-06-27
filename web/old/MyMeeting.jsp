@@ -11,8 +11,8 @@
 <body>
 <div>
     <br><br><br>
-    <p style="text-align:center;font-size: larger" class=" col-lg-2 ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;个人中心->我的会议</p>
-    <p style="text-align:center;font-weight:bold;font-size: larger" class="col-lg-12 ">我要参加的会议</p>
+    <p style="text-align:center;font-size: larger" class=" col-xs-2 ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;个人中心->我的会议</p>
+    <p style="text-align:center;font-weight:bold;font-size: larger" class="col-xs-12 ">我要参加的会议</p>
 </div>
     <div class="container">
     <table id="table"
@@ -35,7 +35,7 @@
             <th data-field="endtime">会议结束时间</th>
             <th data-field="resvertime">会议预定时间</th>
             <th data-field="resverman">预订者</th>
-            <th class="col-lg-2"  data-field="operation" data-formatter="operateFormatter">操作</th>
+            <th class="col-xs-2"  data-field="operation" data-formatter="operateFormatter">操作</th>
         </tr>
         </thead>
     </table>

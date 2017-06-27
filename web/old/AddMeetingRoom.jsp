@@ -20,25 +20,25 @@
                     <form class="form-horizontal">
                         <span class="heading">会议室信息</span>
                         <div class="form-group">
-                            <label class="col-lg-3 control-label">门牌号：</label>
+                            <label class="col-xs-3 control-label">门牌号：</label>
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" id="inputUserName" placeholder="例如：201">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-lg-3 control-label">会议室名称：</label>
+                            <label class="col-xs-3 control-label">会议室名称：</label>
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" id="inputUserZhangName" placeholder="例如：第一会议室">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-lg-3 control-label">容纳人数：</label>
+                            <label class="col-xs-3 control-label">容纳人数：</label>
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" id="inputPassword" placeholder="填写一个整数">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-lg-3 control-label">当前状态：</label>
+                            <label class="col-xs-3 control-label">当前状态：</label>
                             <div class="col-sm-8">
                                 <div class="radio">
                                     <label>
@@ -52,7 +52,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-lg-3 control-label">备注：</label>
+                            <label class="col-xs-3 control-label">备注：</label>
                             <div class="col-sm-8">
                             <textarea class="form-control" rows="3"></textarea>
                             </div>
@@ -62,7 +62,7 @@
                             <button type="submit" class="btn col-md-offset3 ">提交</button>
                         </div>
                         <div class="form-group">
-                            <label class="col-lg-3 control-label"></label>
+                            <label class="col-xs-3 control-label"></label>
                         </div>
                     </form>
                 </div>

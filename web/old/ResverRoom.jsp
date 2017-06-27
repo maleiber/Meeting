@@ -31,19 +31,19 @@
                     <form class="form-horizontal">
                         <span class="heading">会议信息</span>
                         <div class="form-group">
-                            <label class="col-lg-2 control-label">会议名称：</label>
+                            <label class="col-xs-2 control-label">会议名称：</label>
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" id="inputUserName" placeholder="例如：201">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-lg-3 control-label">预参加人数：</label>
+                            <label class="col-xs-3 control-label">预参加人数：</label>
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" id="inputUserZhangName" placeholder="例如：第一会议室">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-lg-3 control-label">预开始时间：</label>
+                            <label class="col-xs-3 control-label">预开始时间：</label>
                             <div class="col-sm-8">
                                 <input type="date" class="form-control" id="inputStartDate">
                                 <br><br>
@@ -51,7 +51,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-lg-3 control-label">预结束时间：</label>
+                            <label class="col-xs-3 control-label">预结束时间：</label>
                             <div class="col-sm-8">
                                 <input type="date" class="form-control" id="inputEndDate">
                                 <br><br>
@@ -59,7 +59,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                        <label class="col-lg-3 control-label">会议室名称：</label>
+                        <label class="col-xs-3 control-label">会议室名称：</label>
                         <div class="col-sm-8">
                             <select class="form-control">
                                 <option value="0">第一会议室</option>
@@ -69,7 +69,7 @@
                         </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-lg-3 control-label">会议说明：</label>
+                            <label class="col-xs-3 control-label">会议说明：</label>
                             <div class="col-sm-8">
                                 <textarea class="form-control" rows="3"></textarea>
                             </div>
@@ -77,19 +77,19 @@
                         <div class="form-group">
                             <table class="formtable">
                                 <tr>
-                                    <label class="col-lg-3 control-label">参会人员：</label>
+                                    <label class="col-xs-3 control-label">参会人员：</label>
                                     <td>
-                                        <div class="col-lg-6 col-md-2" id="divfrom">
+                                        <div class="col-xs-6 col-md-2" id="divfrom">
                                             <select class="" id="selDepartments" onchange="fillEmployees()">
                                             </select>
                                             <select  id="selEmployees" multiple="true">
                                             </select>
                                         </div>
-                                        <div class="col-lg-7 col-md-1" id="divoperator">
+                                        <div class="col-xs-7 col-md-1" id="divoperator">
                                             <input type="button" class="btn" value="&gt;" onclick="selectEmployees()"/>
                                             <input type="button" class="btn" value="&lt;" onclick="deSelectEmployees()"/>
                                         </div>
-                                        <div class="col-lg-9 col-md-2" id="divto">
+                                        <div class="col-xs-9 col-md-2" id="divto">
                                             <select id="selSelectedEmployees" multiple="true">
                                             </select>
                                         </div>
@@ -101,7 +101,7 @@
                             <button type="submit" class="btn col-md-offset3 ">提交</button>
                         </div>
                         <div class="form-group">
-                            <label class="col-lg-3 control-label"></label>
+                            <label class="col-xs-3 control-label"></label>
                         </div>
                     </form>
                 </div>

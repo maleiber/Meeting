@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>BootstrapValidator demo</title>
-    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.css"/>
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
 </head>
 <body>
     <div class="container">
