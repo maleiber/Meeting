@@ -43,6 +43,7 @@ public interface Itest extends Remote{
 	public String searchstaffbyusername(String staff_name)throws RemoteException;//JSONArray
 	public String searchstaffbydepartment(int departmentid)throws RemoteException;//JSONArray
 	public String searchstaffbydepartment()throws RemoteException;//JSONArray
+	public String searchstaff(String jsonString)throws RemoteException;//JSONArray
 	
 	public String searchMeeting(String jsonString)throws RemoteException;
 	public String searchMeeting(Map<String, Object> map)throws RemoteException;//JSONArray
