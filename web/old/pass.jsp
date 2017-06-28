@@ -10,8 +10,8 @@
 <body>
 <div>
     <br><br><br>
-    <p style="text-align:center;font-size: larger" class=" col-lg-2 ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;人员管理->注册审批</p>
-    <p style="text-align:center;font-weight:bold;font-size: larger" class="col-lg-12 ">所有待审批注册信息</p>
+    <p style="text-align:center;font-size: larger" class=" col-xs-2 ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;人员管理->注册审批</p>
+    <p style="text-align:center;font-weight:bold;font-size: larger" class="col-xs-12 ">所有待审批注册信息</p>
 </div>
 <div class="container">
     <table id="table"
@@ -32,7 +32,7 @@
             <th data-field="roomname">账号名</th>
             <th data-field="begintime">联系电话</th>
             <th data-field="endtime">电子邮件</th>
-            <th class="col-lg-2"  data-field="operation" data-formatter="operateFormatter">操作</th>
+            <th class="col-xs-2"  data-field="operation" data-formatter="operateFormatter">操作</th>
         </tr>
         </thead>
     </table>

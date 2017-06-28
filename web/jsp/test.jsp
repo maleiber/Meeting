@@ -3,7 +3,9 @@
 <%@ page import="net.sf.json.JSONArray" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="net.sf.json.JSONObject" %><%--
+<%@ page import="net.sf.json.JSONObject" %>
+<%@ page import="java.sql.Timestamp" %>
+<%@ page import="net.sf.json.JSONString" %><%--
   Created by IntelliJ IDEA.
   User: zhangxuri
   Date: 2017/6/26
@@ -21,8 +23,16 @@
 <%
     helloClient =new HelloClient();
     itest=helloClient.gettest();
-    names=itest.show_personal_meeting(1001);
-    jsonArray=JSONArray.fromObject(names);
-    System.out.println(names);
+    JSONObject jsonObject=new JSONObject();
+    jsonObject.put("name","zhang");
+    jsonObject.put("telephone","13121510044");
+    jsonObject.put("email","zhang");
+    jsonObject.put("position","no");
+    jsonObject.put("departmentid",1);
+    jsonObject.put("username","zhangxuri");
+    jsonObject.put("password","123456");
+    JSONObject jsonObject1=JSONObject.fromObject(jsonObject.toString());
+    itest.regist(jsonObject1.toString());
+    System.out.println(jsonObject1.toString());
 
 %>

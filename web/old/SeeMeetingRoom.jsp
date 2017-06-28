@@ -21,8 +21,8 @@
 <body>
 <div>
     <br><br><br>
-    <p style="text-align:center;font-size: larger" class=" col-lg-2 ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;会议预定->看会议室</p>
-    <p style="text-align:center;font-weight:bold;font-size: larger" class="col-lg-12 ">查看会议室</p>
+    <p style="text-align:center;font-size: larger" class=" col-xs-2 ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;会议预定->看会议室</p>
+    <p style="text-align:center;font-weight:bold;font-size: larger" class="col-xs-12 ">查看会议室</p>
 
 </div>
 <div class="container">

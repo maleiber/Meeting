@@ -12,7 +12,7 @@
 <body>
 <div>
     <br><br><br>
-    <p style="text-align:center;font-size: larger" class=" col-lg-2 ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;会议预定->搜索会议</p>
+    <p style="text-align:center;font-size: larger" class=" col-xs-2 ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;会议预定->搜索会议</p>
     <br>
     <div class="container">
         <div class="panel-body" style="padding-bottom:0px;padding-left: 0px;padding-right: 0px">
@@ -22,18 +22,18 @@
                     <form id="formSearch" class="form-horizontal">
                         <div class="form-group" style="margin-top:15px">
                             <label style="width: 45px" class="control-label " for="txt_search_departmentname">姓名</label>
-                            <div class="col-lg-3">
+                            <div class="col-xs-3">
                                 <input type="text" class="form-control" id="txt_search_departmentname">
                             </div>
-                            <label style="width: 100px" class="control-label col-lg-1"
+                            <label style="width: 100px" class="control-label col-xs-1"
                                    for="txt_search_statu">账号名</label>
-                            <div class="col-lg-3">
+                            <div class="col-xs-3">
                                 <input type="text" class="form-control" id="txt_search_statu">
                             </div>
-                            <label style="width: 100px" class="control-label col-lg-1">状态</label>
+                            <label style="width: 100px" class="control-label col-xs-1">状态</label>
 
 
-                            <div class="col-lg-3" style="margin-top:5px">
+                            <div class="col-xs-3" style="margin-top:5px">
                                 <label>
                                     <input style="margin:0 2px 0 10px" type="radio" name="gender" value="pass"/> 已批准
                                 </label>
@@ -46,10 +46,10 @@
                             </div>
                         </div>
                         <div>
-                            <div class="col-lg-offset-5 col-lg-3" style="text-align:left;">
+                            <div class="col-xs-offset-5 col-xs-3" style="text-align:left;">
 
-                                <button  type="button" class="col-lg-4 nooutline btn btn-default  btn-sm" >查询</button>
-                                <button  type="button" class="col-lg-4 col-lg-offset-1 otherstyle nooutline btn btn-default  btn-sm" >重置</button>
+                                <button  type="button" class="col-xs-4 nooutline btn btn-default  btn-sm" >查询</button>
+                                <button  type="button" class="col-xs-4 col-xs-offset-1 otherstyle nooutline btn btn-default  btn-sm" >重置</button>
 
                             </div>
                         </div>
@@ -58,7 +58,7 @@
             </div>
         </div>
     </div>
-    <p style="text-align:center;font-weight:bold;font-size: larger" class="col-lg-12 ">我预定的会议</p>
+    <p style="text-align:center;font-weight:bold;font-size: larger" class="col-xs-12 ">我预定的会议</p>
     <br>
 </div>
 

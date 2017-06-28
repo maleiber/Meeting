@@ -10,8 +10,8 @@
 <body>
 <div>
     <br><br><br>
-    <p style="text-align:center;font-size: larger" class=" col-lg-2 ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;个人中心->最新通知</p>
-    <p style="text-align:center;font-weight:bold;font-size: larger" class="col-lg-12 ">未来7天我要参加的会议</p>
+    <p style="text-align:center;font-size: larger" class=" col-xs-2 ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;个人中心->最新通知</p>
+    <p style="text-align:center;font-weight:bold;font-size: larger" class="col-xs-12 ">未来7天我要参加的会议</p>
 
 </div>
 <div class="container">
@@ -33,7 +33,7 @@
             <th data-field="roomname">会议室名称</th>
             <th data-field="begintime">会议开始时间</th>
             <th data-field="endtime">会议结束时间</th>
-            <th class="col-lg-2"  data-field="operation" data-formatter="operateFormatter">操作</th>
+            <th class="col-xs-2"  data-field="operation" data-formatter="operateFormatter">操作</th>
         </tr>
         </thead>
     </table>
@@ -43,7 +43,7 @@
 <!--<script src="assets/bootstrap2.3/js/bootstrap.min.js"></script>-->
 <script src="../js/jquery.base64.js"></script>
 <script src="../js/bootstrap-table.js"></script>
-<p style="text-align:center;font-weight:bold;font-size: larger" class="col-lg-12">已取消的会议</p>
+<p style="text-align:center;font-weight:bold;font-size: larger" class="col-xs-12">已取消的会议</p>
 <div class="container">
     <table id="table_concle"
            class="table table-striped"
@@ -64,7 +64,7 @@
             <th data-field="begintime">会议开始时间</th>
             <th data-field="endtime">会议结束时间</th>
             <th data-field="endtime">取消原因</th>
-            <th class="col-lg-2"  data-field="operation" data-formatter="operateFormatter">操作</th>
+            <th class="col-xs-2"  data-field="operation" data-formatter="operateFormatter">操作</th>
         </tr>
         </thead>
     </table>
