@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+	<persistence-unit name="2017-6-11" transaction-type="RESOURCE_LOCAL">
+		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+		<class>data.Meeting</class><class>data.VisitNum</class><class>data.Department</class><class>data.Administrator</class><class>data.DepartmentRelationStaff</class><class>data.User</class><class>data.MeetingRelationStaff</class><class>data.MeetingRoom</class><class>data.Employee</class><class>data.UserId</class><class>data.DepartmentRelationStaffId</class><class>data.MeetingRelationStaffId</class><class>data.EmployeeCopy</class><properties>
+			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://172.18.5.127:3306/meetingroom"/>
+			<property name="javax.persistence.jdbc.user" value="root"/>
+			<property name="javax.persistence.jdbc.password" value="123456"/>
+		</properties>
+	</persistence-unit>
+</persistence>

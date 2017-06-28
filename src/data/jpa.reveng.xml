@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-reverse-engineering PUBLIC "-//Hibernate/Hibernate Reverse Engineering DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-reverse-engineering-3.0.dtd" >
+
+<hibernate-reverse-engineering>
+	<type-mapping>
+		<sql-type jdbc-type="VARCHAR" hibernate-type="string"></sql-type>
+		<sql-type jdbc-type="INT" hibernate-type="int"></sql-type>
+		<sql-type jdbc-type="datetime"
+			hibernate-type="java.sql.Timestamp">
+		</sql-type>
+		<sql-type jdbc-type="text" hibernate-type="string"></sql-type>
+		<sql-type jdbc-type="bigint" hibernate-type="long"></sql-type>
+	</type-mapping>
+	<table name="administrator" catalog="meetingroom">
+		<primary-key>
+
+			<key-column name="adm_id" />
+		</primary-key>
+	</table>
+<table name="user" catalog="meetingroom">
+	<primary-key>
+		<key-column name="UserID" jdbc-type="int" property="userID" type="int"/>
+	</primary-key>
+	<column name="username" jdbc-type="varchar" property="username"
+		type="String">
+	</column>
+	<column name="password" jdbc-type="varchar" property="password"
+		type="String">
+	</column>
+
+</table>
+</hibernate-reverse-engineering>
