@@ -188,7 +188,7 @@ public class UserDAO implements IUserDAO {
 	{
 		EntityManagerHelper.log("finding all user count", Level.INFO, null);
 		try {
-		final String queryString = "select max( model."+"UserID"+" )from User model";
+		final String queryString = "select max( model."+"userId"+" )from User model";
 					Query query = getEntityManager().createQuery(queryString);
 				Object q1=query.getResultList().get(0);
 				int j=Integer.parseInt(String.valueOf(q1)); 

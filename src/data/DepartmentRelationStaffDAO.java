@@ -167,7 +167,7 @@ public class DepartmentRelationStaffDAO  implements IDepartmentRelationStaffDAO{
 	{
 					EntityManagerHelper.log("finding all DepartmentRelationStaff count", Level.INFO, null);
 			try {
-			final String queryString = "select max( model."+"id.id"+" )from DepartmentRelationStaff model";
+			final String queryString = "select max( model."+"id"+" )from DepartmentRelationStaff model";
 						Query query = getEntityManager().createQuery(queryString);
 					Object q1=query.getResultList().get(0);
 					int j=Integer.parseInt(String.valueOf(q1)); 

@@ -205,9 +205,11 @@ public class EmployeeCopyDAO implements IEmployeeCopyDAO {
 	@SuppressWarnings("unchecked")
 	public List<EmployeeCopy> findAll() {
 		EntityManagerHelper.log("finding all EmployeeCopy instances", Level.INFO, null);
+		//getEntityManager().flush();
 		try {
 			final String queryString = "select model from EmployeeCopy model";
-			Query query = getEntityManager().createQuery(queryString);
+			Query query = getEntityManager().createQuery(queryString).setHint(  
+	                "toplink.refresh", true);  
 			return query.getResultList();
 		} catch (RuntimeException re) {
 			EntityManagerHelper.log("find all failed", Level.SEVERE, re);
