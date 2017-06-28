@@ -176,7 +176,57 @@ public class EmployeeCopyDAO implements IEmployeeCopyDAO {
 			throw re;
 		}
 	}
-
+	
+	@SuppressWarnings("unchecked")
+	public List<EmployeeCopy> findByMultiProperty(String name,String username,int state)
+	{
+		EntityManagerHelper.log("Employee copy search multiproperty", Level.SEVERE, null);
+		String queryString;
+		int isFirst=1;
+		queryString="select model from EmployeeCopy model ";
+		if(state==0||state==1||state==2)
+		{
+			if(isFirst==1){
+				queryString+="where ";	
+			}else {
+				queryString+=" and ";
+			}
+			queryString+="model.checkStatus="+state;
+			isFirst=0;
+		}
+		if(name.length()>0)
+		{
+			if(isFirst==1){
+				queryString+="where ";	
+			}else {
+				queryString+=" and ";
+			}
+			queryString+="model.name= :nameValue";
+			isFirst=0;
+		}
+		if(username.length()>0)
+		{
+			if(isFirst==1){
+				queryString+="where ";	
+			}else {
+				queryString+=" and ";
+			}
+			queryString+="model.username= :usernameValue";
+			isFirst=0;
+		}
+		Query query = getEntityManager().createQuery(queryString);
+		if(name.length()>0)
+		{
+			query.setParameter("nameValue", name);
+		}
+		if(username.length()>0)
+		{
+			query.setParameter("usernameValue", username);
+		}
+		return query.getResultList();
+		
+	}
+	
 	public List<EmployeeCopy> findByName(Object name) {
 		return findByProperty(NAME, name);
 	}

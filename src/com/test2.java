@@ -13,10 +13,17 @@ import java.util.Map;
 
 import com.sun.org.apache.bcel.internal.generic.NEW;
 
+import net.sf.json.JSONObject;
+
 public class test2 {
 	public static void main(String[] args) throws AlreadyBoundException, IOException{
      test test=new test();
      Timestamp time=new Timestamp(0);
+     JSONObject jsonString=new JSONObject();
+     jsonString.put("name", "");
+     jsonString.put("username", "");
+     jsonString.put("state", 3);
+    // System.out.println(test.searchstaff(jsonString.toString()));
      //test.add_meeting_room("第二会议室", 30, "301", "", "空闲");
      // test.show_meetingroom(1);
     // test.modify_meeting_room(2,"第二会议室", 40, "401", "", "空闲");

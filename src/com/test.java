@@ -267,7 +267,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		try {
 			addstaff(staff_id,a.getName(),a.getTelephone(),a.getEmail(),a.getPosition());
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}		
 		
@@ -598,7 +598,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		meetingroomid=(int)tempJson.get("meetingroomid");
 		capacity=(int)tempJson.get("capacity");
 		meetingroom_name=(String)tempJson.get("meetingroomname");
-		room_numbler=(String)tempJson.get("roomnumbler");
+		room_numbler=(String)tempJson.get("roomnumber");
 		remark=(String)tempJson.get("remark");
 		atate=(String)tempJson.get("state");
 		return modify_meeting_room(meetingroomid, meetingroom_name, capacity, room_numbler, remark, atate);
@@ -872,6 +872,55 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     	}
     }
     
+    public String searchstaff(String jsonString)throws RemoteException
+    {
+    	String name="",username="";
+    	int state=-1;
+    	JSONObject tempJson=JSONObject.fromObject(jsonString);
+    	JSONArray ret_val=new JSONArray();
+    	
+    	name=(String)tempJson.get("name");
+    	username=(String)tempJson.get("username");
+    	state=(int)tempJson.get("state");
+    	
+    	List<Employee> empList=new ArrayList<Employee>();
+    	List<EmployeeCopy> empCopyList=new ArrayList<EmployeeCopy>();
+    	EmployeeDAO empDao=new EmployeeDAO();
+    	EmployeeCopyDAO empCopyDAO=new EmployeeCopyDAO();
+    	
+    	
+    	
+    	if(state==0||state==1)//in employcopy
+    	{
+    		empCopyList=empCopyDAO.findByMultiProperty(name, username,state);
+    		for(EmployeeCopy e:empCopyList)
+    		{
+    			ret_val.add(JSONObject.fromObject(e));
+    		}
+    		
+    	}
+    	else if(state==2) {//in employee
+    		empList=empDao.findByMultiProperty(name, username);
+    		for(Employee ec:empList)
+    		{
+    			ret_val.add(JSONObject.fromObject(ec));
+    		}
+		}else {				//in both employee and employee
+			empCopyList=empCopyDAO.findByMultiProperty(name, username,state);
+    		for(EmployeeCopy e:empCopyList)
+    		{
+    			ret_val.add(JSONObject.fromObject(e));
+    		}
+    		empList=empDao.findByMultiProperty(name, username);
+    		for(Employee ec:empList)
+    		{
+    			ret_val.add(JSONObject.fromObject(ec));
+    		}
+		}
+    	return  ret_val.toString();
+    }
+    
+    
   //JSONArray
     public String searchstaffbydepartment()throws RemoteException
     {
@@ -1063,11 +1112,14 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		MeetingRoomDAO mrd=new MeetingRoomDAO();
 		List<MeetingRoom> mrList=new ArrayList<MeetingRoom>();
 		
+		EntityManagerHelper.log("search_meeting_room_by_number."+number, Level.INFO, null);
+		
 		mrList=mrd.findByRoomNumbler(number);
 		for(MeetingRoom mr:mrList)
 		{
 			ret_val.add(JSONObject.fromObject(mr));
 		}
+		
 		return ret_val.toString();
 		
 	}

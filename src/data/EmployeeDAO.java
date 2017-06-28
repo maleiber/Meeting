@@ -1,5 +1,6 @@
 package data;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import javax.persistence.EntityManager;
@@ -166,6 +167,73 @@ em.getTransaction().commit();
 				throw re;
 		}
 	}			
+    
+    @SuppressWarnings("unchecked")
+	public List<Employee> findByMultiProperty(String name,String username)
+	{
+		EntityManagerHelper.log("Employee search multiproperty", Level.SEVERE, null);
+		UserDAO userDao=new UserDAO();
+		List<Employee> empList=new ArrayList<Employee>();
+		List<User> userList=new ArrayList<User>();
+		String queryString;
+		int isFirst=1;
+		queryString="select model from Employee model ";
+		if(username.length()>0)
+		{
+			if(isFirst==1){
+				queryString+="where (";	
+			}else {
+				queryString+=" and (";
+			}
+			userList=userDao.findByUsername(username);
+			int isFirstUsername=1;
+			for(User u:userList)
+			{
+				if(isFirstUsername==1)
+				{
+					isFirstUsername=0;
+				}else {
+					queryString+=" or ";
+				}
+				queryString+="model.userid=";
+				queryString+=u.getUserId();
+			}
+			queryString+=" )";
+			isFirst=0;
+		}
+		while(name.length()>0)
+		{
+			empList=findByName(name);
+			if(empList.size()==0)break;
+			if(isFirst==1){
+				queryString+="where (";	
+			}else {
+				queryString+=" and (";
+			}
+			int isFirstemployee=1;
+			for(Employee e:empList)
+			{
+				if(isFirstemployee==1)
+				{
+					isFirstemployee=0;
+				}else {
+					queryString+=" or ";
+				}
+				queryString+="model.name=";
+				queryString+=e.getName();
+			}
+			queryString+=" )";
+			isFirst=0;
+			
+			break;
+		}
+		Query query = getEntityManager().createQuery(queryString);
+		
+		
+		return query.getResultList();
+		
+	}
+    
 	public List<Employee> findByName(Object name
 	) {
 		return findByProperty(NAME, name
