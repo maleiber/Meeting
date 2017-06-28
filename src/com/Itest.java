@@ -1,4 +1,3 @@
-
 package com;
 
 import java.rmi.Remote;
@@ -73,11 +72,11 @@ public interface Itest extends Remote{
 			)throws RemoteException;
 	public boolean add_meeting(String jsonString)throws RemoteException;
 	
-	public void add_meeting_room(
+	public boolean add_meeting_room(
 			String meetingroom_name,int capacity,
 			String room_numbler,String remark,
 			String atate)throws RemoteException;
-	public void add_meeting_room(String jString)throws RemoteException;
+	public boolean add_meeting_room(String jString)throws RemoteException;
 	
 	public boolean delete_meeting_room(int meetingroom_id)throws RemoteException;
 	public boolean modify_meeting_room(
@@ -90,5 +89,9 @@ public interface Itest extends Remote{
 	public String show_meetingroom(int meetingroomid)throws RemoteException;//JSONObject
 	public String show_personal_meeting(int staffid)throws RemoteException;//JSONArray
 	public String show_personal_book_meeting(int staffid,String username)throws RemoteException;
-	public boolean checkusername(String username)throws RemoteException;	
+	public boolean checkusername(String username)throws RemoteException;
+	
+	public String search_meeting_room_by_name(String name)throws RemoteException;
+	public String search_meeting_room_by_number(String number)throws RemoteException;
+	
 }

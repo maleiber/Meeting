@@ -124,21 +124,16 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		
 		for(EmployeeCopy ec:a)
 		{
-			tempString="name:"+ec.getName();
-			EntityManagerHelper.log(tempString, Level.INFO, null);
+			
 			if(ec.getCheckStatus()==status)
 			{
+				tempString="name:"+ec.getName()+" email:"+ec.getEmail();
+				EntityManagerHelper.log(tempString, Level.INFO, null);
 				ret_val.add(JSONObject.fromObject(ec));
 			}
 		}
 		return ret_val.toString();
-		/*
-		for(int i=0;i<a.size();i++){
-			if(a.get(i).getCheckStatus()==status){
-			 System.out.println(a.get(i).getStaffId());
-			 System.out.println(a.get(i).getName());
-			}
-		}*/
+		
 	}
 	
 	public String showpassedall()throws RemoteException{
@@ -311,7 +306,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		//int id=assign();
 		//max=b.getcount();
 		UserDAO mUserDAO=new UserDAO();
-		Employee a=new Employee(staffid,name,telephone,email,position,1,mUserDAO.getcount()+1);
+		Employee a=new Employee(staffid,name,telephone,email,position,1,mUserDAO.getcount());
 	//    adduser();
 	//	a.setEmail(email);a.setLevel(1);a.setName(name);a.setPosition(position);a.setTelephone(telephone);
 		b.update(a);
@@ -323,7 +318,8 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		User u=new User();
 		
 	//	UserId ui =new UserId();
-		u.setUserId(ud.getcount()+1);
+		int userid=ud.getcount()+1;
+		u.setUserId(userid);
 		u.setPassword(password);
 		u.setUsername(username);
 	//	u.setUserId(ui);
@@ -336,6 +332,8 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 	
 	
 	public String login(String name,String password)throws RemoteException{
+		
+		EntityManagerHelper.log("start login", Level.INFO, null);
 		 JSONObject ret_val = null;
 		List<User> a =new ArrayList<User>();
 		UserDAO b=new UserDAO();
@@ -349,10 +347,12 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 			employee=ed.findByUserid(a.get(0).getUserId()).get(0);
 			
 			ret_val= JSONObject.fromObject(employee);
+			EntityManagerHelper.log("login success", Level.INFO, null);
 			return ret_val.toString();
 		}
 		else
 		{
+			EntityManagerHelper.log("login failed", Level.INFO, null);
 			return "";
 		}
 		
@@ -520,7 +520,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 	}
 	
 	
-	public void add_meeting_room(String jString)throws RemoteException{
+	public boolean add_meeting_room(String jString)throws RemoteException{
 		String meetingroom_name,room_number,remark,atate;
 		int capacity;
 		JSONObject tempJson=JSONObject.fromObject(jString);
@@ -528,14 +528,14 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		room_number=(String)tempJson.get("roomnumber");
 		remark=(String)tempJson.get("remark");
 		atate=(String)tempJson.get("state");
-		
+		capacity=(int)tempJson.get("capacity");
+		return add_meeting_room(meetingroom_name, capacity, room_number, remark, atate);
 	
 	}
-	public void add_meeting_room(String meetingroom_name,int capacity,String room_numbler,String remark,String atate)throws RemoteException{
+	public boolean add_meeting_room(String meetingroom_name,int capacity,String room_numbler,String remark,String atate)throws RemoteException{
 		MeetingRoom mRoom=new MeetingRoom();
 		MeetingRoomDAO mRoomDAO=new MeetingRoomDAO();
-		
-		
+	
 		mRoom.setRoomNumbler(room_numbler);
 		mRoom.setCapacity((long)capacity);
 		mRoom.setMeetingRoomName(meetingroom_name);
@@ -543,6 +543,8 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		mRoom.setCurrentAtate(atate);
 		mRoom.setMeetingRoomId(mRoomDAO.getcount()+1);
 		mRoomDAO.update(mRoom);
+		
+		return true;
 	}
 	
 	public boolean delete_meeting_room(int meetingroom_id)throws RemoteException{
@@ -555,6 +557,8 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		return true;
 		}
 	}
+	
+	
 	
 	public String show_allmeetingroom()throws RemoteException{
 		JSONArray ret_val=new JSONArray();
@@ -1038,6 +1042,35 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     	Timestamp timestamp=Timestamp.valueOf(newDateString);
     	return timestamp;
     }
+	@Override
+	public String search_meeting_room_by_name(String name) {
+		// TODO Auto-generated method stub
+		JSONArray ret_val=new JSONArray();
+		MeetingRoomDAO mrd=new MeetingRoomDAO();
+		List<MeetingRoom> mrList=new ArrayList<MeetingRoom>();
+		
+		mrList=mrd.findByMeetingRoomName(name);
+		for(MeetingRoom mr:mrList)
+		{
+			ret_val.add(JSONObject.fromObject(mr));
+		}
+		return ret_val.toString();
+	}
+	@Override
+	public String search_meeting_room_by_number(String number) {
+		// TODO Auto-generated method stub
+		JSONArray ret_val=new JSONArray();
+		MeetingRoomDAO mrd=new MeetingRoomDAO();
+		List<MeetingRoom> mrList=new ArrayList<MeetingRoom>();
+		
+		mrList=mrd.findByRoomNumbler(number);
+		for(MeetingRoom mr:mrList)
+		{
+			ret_val.add(JSONObject.fromObject(mr));
+		}
+		return ret_val.toString();
+		
+	}
 
 	
 }
