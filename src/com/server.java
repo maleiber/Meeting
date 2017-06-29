@@ -30,6 +30,7 @@ public class server extends test{
 		
 		reg=LocateRegistry.createRegistry(8890);
 		reg.rebind("test", new test());
+		
 		//Naming.bind("rmi://172.18.5.76:8890/test", test);
 		//reg.rebind("rmi://localhost:8888/test", test);
 		System.out.println("start");

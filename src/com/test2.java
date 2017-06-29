@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.persistence.sessions.SessionProfiler;
+
 import com.sun.org.apache.bcel.internal.generic.NEW;
 
 import net.sf.json.JSONObject;
@@ -23,6 +25,7 @@ public class test2 {
      jsonString.put("name", "");
      jsonString.put("username", "");
      jsonString.put("state", 3);
+   // System.out.println(test.searchstaffbydepartment());
     // System.out.println(test.searchstaff(jsonString.toString()));
      //test.add_meeting_room("第二会议室", 30, "301", "", "空闲");
      // test.show_meetingroom(1);

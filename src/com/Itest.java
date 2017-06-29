@@ -56,7 +56,7 @@ public interface Itest extends Remote{
 			//JSONArray
 	
 	
-	public void add_department(String departmentname)throws RemoteException;
+	public boolean add_department(String departmentname)throws RemoteException;
 	
 	public boolean modify_department(int departmentid,String modifyname)throws RemoteException;
 	public boolean modify_department(String jsonString)throws RemoteException;

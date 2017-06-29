@@ -6,6 +6,8 @@ import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import com.sun.org.glassfish.external.statistics.Statistic;
+
 /**
  	* A data access object (DAO) providing persistence and search support for Employee entities.
  	 		* Transaction control of the save(), update() and delete() operations must be handled externally by senders of these methods 
@@ -21,7 +23,7 @@ public class EmployeeDAO  implements IEmployeeDAO{
 	public static final String POSITION = "position";
 	public static final String LEVEL = "level";
 	public static final String USERID = "userid";
-
+	public static final String STATUS = "state";
 
 
 
@@ -143,7 +145,7 @@ em.getTransaction().commit();
 	            throw re;
         }
     }    
-    
+     
 
 /**
 	 * Find all Employee entities with a specific property value.  
@@ -169,7 +171,7 @@ em.getTransaction().commit();
 	}			
     
     @SuppressWarnings("unchecked")
-	public List<Employee> findByMultiProperty(String name,String username)
+	public List<Employee> findByMultiProperty(String name,String username,int state)
 	{
 		EntityManagerHelper.log("Employee search multiproperty", Level.SEVERE, null);
 		UserDAO userDao=new UserDAO();
@@ -178,14 +180,27 @@ em.getTransaction().commit();
 		String queryString;
 		int isFirst=1;
 		queryString="select model from Employee model ";
+		if(state==0||state==1)
+		{
+			if(isFirst==1){
+				queryString+="where ";	
+			}else {
+				queryString+=" and ";
+			}
+			queryString+="model.state="+state;
+			isFirst=0;
+		}
 		if(username.length()>0)
 		{
+			userList=userDao.findByUsername(username);
+			if(userList.size()==0)return empList;
+			
 			if(isFirst==1){
 				queryString+="where (";	
 			}else {
 				queryString+=" and (";
 			}
-			userList=userDao.findByUsername(username);
+			
 			int isFirstUsername=1;
 			for(User u:userList)
 			{
@@ -195,8 +210,8 @@ em.getTransaction().commit();
 				}else {
 					queryString+=" or ";
 				}
-				queryString+="model.userid=";
-				queryString+=u.getUserId();
+				queryString+="model.userid = ";
+				queryString+="'"+u.getUserId()+"'";
 			}
 			queryString+=" )";
 			isFirst=0;
@@ -204,7 +219,8 @@ em.getTransaction().commit();
 		while(name.length()>0)
 		{
 			empList=findByName(name);
-			if(empList.size()==0)break;
+			if(empList.size()==0)return empList;
+			
 			if(isFirst==1){
 				queryString+="where (";	
 			}else {
@@ -219,8 +235,8 @@ em.getTransaction().commit();
 				}else {
 					queryString+=" or ";
 				}
-				queryString+="model.name=";
-				queryString+=e.getName();
+				queryString+="model.name = ";
+				queryString+="'"+e.getName()+"'";
 			}
 			queryString+=" )";
 			isFirst=0;
@@ -237,6 +253,12 @@ em.getTransaction().commit();
 	public List<Employee> findByName(Object name
 	) {
 		return findByProperty(NAME, name
+		);
+	}
+	
+	public List<Employee> findByStatus(Object name
+	) {
+		return findByProperty(STATUS, name
 		);
 	}
 	

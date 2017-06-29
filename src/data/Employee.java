@@ -1,5 +1,6 @@
 package data;
 
+import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -22,6 +23,8 @@ public class Employee implements java.io.Serializable {
 	private String position;
 	private Integer level;
 	private Integer userid;
+	private Timestamp passtime;
+	private Integer state;
 
 	// Constructors
 
@@ -37,7 +40,7 @@ public class Employee implements java.io.Serializable {
 
 	/** full constructor */
 	public Employee(Integer staffId, String name, String telephone, String email, String position, Integer level,
-			Integer userid) {
+			Integer userid, Timestamp passtime, Integer state) {
 		this.staffId = staffId;
 		this.name = name;
 		this.telephone = telephone;
@@ -45,6 +48,8 @@ public class Employee implements java.io.Serializable {
 		this.position = position;
 		this.level = level;
 		this.userid = userid;
+		this.passtime = passtime;
+		this.state = state;
 	}
 
 	// Property accessors
@@ -118,6 +123,26 @@ public class Employee implements java.io.Serializable {
 
 	public void setUserid(Integer userid) {
 		this.userid = userid;
+	}
+
+	@Column(name = "passtime", length = 19)
+
+	public Timestamp getPasstime() {
+		return this.passtime;
+	}
+
+	public void setPasstime(Timestamp passtime) {
+		this.passtime = passtime;
+	}
+
+	@Column(name = "state")
+
+	public Integer getState() {
+		return this.state;
+	}
+
+	public void setState(Integer state) {
+		this.state = state;
 	}
 
 }

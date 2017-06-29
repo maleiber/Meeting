@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
+import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.persistence.jaxb.javamodel.JavaAnnotation;
 
@@ -301,12 +302,13 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 	
 	void addstaff(int staffid,String name,String telephone,String email,String position) throws RemoteException{
 		EmployeeDAO b=new EmployeeDAO();
+		Timestamp nowTimestamp = new Timestamp(System.currentTimeMillis()); 
 	//	if(checkusername())
 		int max;
 		//int id=assign();
 		//max=b.getcount();
 		UserDAO mUserDAO=new UserDAO();
-		Employee a=new Employee(staffid,name,telephone,email,position,1,mUserDAO.getcount());
+		Employee a=new Employee(staffid,name,telephone,email,position,1,mUserDAO.getcount(),nowTimestamp,0);
 	//    adduser();
 	//	a.setEmail(email);a.setLevel(1);a.setName(name);a.setPosition(position);a.setTelephone(telephone);
 		b.update(a);
@@ -363,11 +365,12 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		JSONObject tempJson=JSONObject.fromObject(jsonString);
 		String username=(String)tempJson.get("username");
 		String password=(String)tempJson.get("password");
+		
 		return login(username,password);
 	}
 	
 	
-	public void add_department(String departmentname)throws RemoteException{
+	public boolean add_department(String departmentname)throws RemoteException{
 //		check
 		if(checkdepartmentname(departmentname)){
 		Department department=new Department();
@@ -377,9 +380,11 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		department.setDepartmentNum(0);
 		mDepartmentDAO.update(department);
 		EntityManagerHelper.log("add department success", Level.INFO, null);
+		return true;
 		}
 		else{
 			EntityManagerHelper.log("add department failure", Level.INFO, null);
+			return false;
 		}
 	}
 	
@@ -884,39 +889,70 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     	state=(int)tempJson.get("state");
     	
     	List<Employee> empList=new ArrayList<Employee>();
-    	List<EmployeeCopy> empCopyList=new ArrayList<EmployeeCopy>();
+    	//List<EmployeeCopy> empCopyList=new ArrayList<EmployeeCopy>();
     	EmployeeDAO empDao=new EmployeeDAO();
     	EmployeeCopyDAO empCopyDAO=new EmployeeCopyDAO();
+    	User tempUser=null;
+    	UserDAO uDao=new UserDAO();
+    	JSONObject nowJson=new JSONObject();
+    	
+    	String output="multi search staff name:"+name;
+    	output+=" username:"+username;
+    	output+=" state:"+(state);
+    	EntityManagerHelper.log(output, Level.INFO, null);
+		
     	
     	
-    	
-    	if(state==0||state==1)//in employcopy
+    	if(state==1||state==2)//in employ status=0
     	{
-    		empCopyList=empCopyDAO.findByMultiProperty(name, username,state);
-    		for(EmployeeCopy e:empCopyList)
+    		//TODO
+    		try{
+    			empList=empDao.findByMultiProperty(name, username,state-1);
+    		}catch (Exception e)
     		{
-    			ret_val.add(JSONObject.fromObject(e));
+    			e.printStackTrace();
+    		}
+    		for(Employee ec:empList)
+    		{
+    			tempUser=null;
+    			tempUser=uDao.findById(ec.getUserid());
+    			if(tempUser==null)continue;
+    			nowJson=JSONObject.fromObject(ec);
+    			nowJson.put("username", tempUser.getUsername());
+    			ret_val.add(nowJson);
     		}
     		
+    		//empCopyList=empCopyDAO.findByMultiProperty(name, username,state);
+    		//for(EmployeeCopy e:empCopyList)
+    		//{
+    		//	ret_val.add(JSONObject.fromObject(e));
+    		//}
+    		
     	}
-    	else if(state==2) {//in employee
-    		empList=empDao.findByMultiProperty(name, username);
+    	else {				//in both employee and employee
+			//empCopyList=empCopyDAO.findByMultiProperty(name, username,state);
+    		//for(EmployeeCopy e:empCopyList)
+    		//{
+    		//	ret_val.add(JSONObject.fromObject(e));
+    		//}
+    		try{
+    			empList=empDao.findByMultiProperty(name, username,state-1);
+    		}catch (Exception e)
+    		{
+    			e.printStackTrace();
+    		}
+    		
     		for(Employee ec:empList)
     		{
-    			ret_val.add(JSONObject.fromObject(ec));
-    		}
-		}else {				//in both employee and employee
-			empCopyList=empCopyDAO.findByMultiProperty(name, username,state);
-    		for(EmployeeCopy e:empCopyList)
-    		{
-    			ret_val.add(JSONObject.fromObject(e));
-    		}
-    		empList=empDao.findByMultiProperty(name, username);
-    		for(Employee ec:empList)
-    		{
-    			ret_val.add(JSONObject.fromObject(ec));
+    			tempUser=null;
+    			tempUser=uDao.findById(ec.getUserid());
+    			if(tempUser==null)continue;
+    			nowJson=JSONObject.fromObject(ec);
+    			nowJson.put("username", tempUser.getUsername());
+    			ret_val.add(nowJson);
     		}
 		}
+    	EntityManagerHelper.log("staff multisearch done with member:"+ret_val.size(), Level.INFO, null);
     	return  ret_val.toString();
     }
     
@@ -929,7 +965,8 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     	EmployeeDAO ed=new EmployeeDAO();
     	List<Employee> empList=new ArrayList<Employee>();
     	JSONArray ret_val = new JSONArray();
-    	
+    	JSONArray tempVAl=new JSONArray();
+    	JSONObject tempJson;
     	List<Department> mDepartments=new ArrayList<Department>();
 		DepartmentDAO mDepartmentDAO=new DepartmentDAO();
 		mDepartments=mDepartmentDAO.findAll();
@@ -947,17 +984,22 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 	    	}
 	    	else
 	    	{
+	    		tempVAl=new JSONArray();
 	    		for(DepartmentRelationStaff d:drsList)
 	    		{
 	    			empList.add(ed.findById(d.getStaffId()));
-	    			
+	    			tempVAl.add(ed.findById(d.getStaffId()));
 	    		}
 	    		EntityManagerHelper.log("search staff by department id: "+depart.getDepartmentId()+" information.", Level.INFO, null);
 	    		
-	    		tempString+=JSONObject.fromObject(empList).toString();
+	    		//tempString+=tempVAl.toString();
 	    		empList.clear();
 	    	}
-			ret_val.add(tempString);
+			tempJson=new JSONObject();
+			tempJson.put("stafflist", tempVAl);
+			tempJson.put("department", depart);
+			ret_val.add(tempJson);
+			
 		}
     	
     	return ret_val.toString();
