@@ -64,14 +64,14 @@ public interface Itest extends Remote{
 	public boolean delect_department(int departmentid)throws RemoteException;
 	public String show_department()throws RemoteException;//JSONArray
 	
-	public boolean add_meeting(
+	public String add_meeting(
 			String bookname,String meetingname,
 			int meeting_num,String meeting_notes,
 			int meetingroom_id,
 			String startTime, String endTime,
 			List<Integer>staffid
 			)throws RemoteException;
-	public boolean add_meeting(String jsonString)throws RemoteException;
+	public String add_meeting(String jsonString)throws RemoteException;
 	
 	public boolean add_meeting_room(
 			String meetingroom_name,int capacity,
@@ -94,5 +94,10 @@ public interface Itest extends Remote{
 	
 	public String search_meeting_room_by_name(String name)throws RemoteException;
 	public String search_meeting_room_by_number(String number)throws RemoteException;
+	
+	public boolean reverse_staff(int staffid)throws RemoteException;
+	
+	public String search_avaliable_meetingroom()throws RemoteException;
+	public String search_avaliable_staff()throws RemoteException;
 	
 }
