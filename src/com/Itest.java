@@ -97,7 +97,9 @@ public interface Itest extends Remote{
 	
 	public boolean reverse_staff(int staffid)throws RemoteException;
 	
-	public String search_avaliable_meetingroom()throws RemoteException;
-	public String search_avaliable_staff()throws RemoteException;
+	public String search_avaliable_meetingroom(String json)throws RemoteException;
+	public String search_avaliable_meetingroom(String starttime,String endtime,int nownumber)throws RemoteException;
+	public String search_avaliable_staff(String starttime,String endtime)throws RemoteException;
+	public String search_avaliable_staff(String json)throws RemoteException;
 	
 }

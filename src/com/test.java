@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -630,9 +631,15 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 	
 	
 	
-	boolean checktimeconflict(Timestamp starttime,Timestamp endtime,int meetingroom_id){
-		
-		if(starttime.getTime()>endtime.getTime())return false;
+	String checktimeconflict(Timestamp starttime,Timestamp endtime,int meetingroom_id){
+		//TODO
+		JSONArray ret_val=new JSONArray();
+		JSONObject tempJson;
+		if(starttime.getTime()>endtime.getTime())
+		{
+			//ret_val.add()
+			//return ret_val.toString();
+		}
 		
 		Meeting nowMeeting=new Meeting();
 		nowMeeting.setStartTime(starttime);
@@ -662,21 +669,29 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		{
 			if(m.getStartTime().getTime()<lastendtime)
 			{
-				return false;
+				tempJson=new JSONObject();
+				tempJson.put("meetingname", m.getMeetingName());
+				tempJson.put("starttime", m.getStartTime().toString());
+				tempJson.put("endtime", m.getEndTime().toString());
+				//return false;
+				ret_val.add(tempJson);
 			}
 			lastendtime=m.getEndTime().getTime();
 		}
 		
-		return true;
+		return ret_val.toString();
+		//return true;
 	}
 	
-	public boolean add_meeting(String jsonString)throws RemoteException{
+	public String add_meeting(String jsonString)throws RemoteException{
 		JSONObject tempJson=JSONObject.fromObject(jsonString);
 		JSONArray tempJsonStaff;
 		String bookname,meetingname,meeting_notes;
 		int meeting_num,meetingroom_id;
 		String sTime,eTime;
 		List<Integer>staffid=new ArrayList<Integer>();
+		List<String> staffidstrList= new ArrayList<String>() ;
+		EntityManagerHelper.log("add meeting ", Level.INFO, null);
 		
 		bookname=(String)tempJson.get("bookname");
 		meetingname=(String)tempJson.get("meetingname");
@@ -687,12 +702,22 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		eTime=(String)tempJson.get("endtime");
 		tempJsonStaff=(JSONArray)tempJson.get("staffid");
 		
-		staffid=JSONArray.toList(tempJsonStaff);
+		try {
+			staffidstrList=JSONArray.toList(tempJsonStaff);
+			for(int i=0;i<staffidstrList.size();i++)
+			{
+				staffid.add(Integer.parseInt(staffidstrList.get(i)));
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		
 		
 		return add_meeting(bookname, meetingname, meeting_num, meeting_notes, meetingroom_id, sTime, eTime, staffid);
 	}
 	
-	public boolean add_meeting(String bookname,String meetingname,int meeting_num,String meeting_notes,int meetingroom_id,
+	public String add_meeting(String bookname,String meetingname,int meeting_num,String meeting_notes,int meetingroom_id,
 	String sTime, String eTime,List<Integer>staffid)throws RemoteException{
 		
 		Timestamp startTime=convertDate(sTime);
@@ -701,54 +726,101 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		UserDAO uDao=new UserDAO();
 		List<User> userList= new ArrayList<User>();
 		EmployeeDAO eDao=new EmployeeDAO();
-		List<Employee> tempe;
+		List<Employee> tempe=null;
 		Meeting meeting=new Meeting();
 		MeetingDAO meetingDAO= new MeetingDAO();
 		MeetingRelationStaff mRelationStaff=new MeetingRelationStaff();
 		MeetingRelationStaffDAO mRelationStaffDAO=new MeetingRelationStaffDAO();
 	//	MeetingRelationStaffId mRelationStaffId=new MeetingRelationStaffId();
-		
+		JSONObject retJson = new JSONObject(),tempJson;
+		JSONArray mistakeListArray=new JSONArray();
+		JSONArray checkJson;
 		userList=uDao.findByProperty("username", bookname);
 		if(userList.size()>1)
 		{
 			EntityManagerHelper.log("add meeting failure: have several book name", Level.INFO, null);
-			return false;
+			tempJson=new JSONObject();
+			tempJson.put("errortype", "0");
+			tempJson.put("errormsg", "add meeting failure: have several book name");
+			mistakeListArray.add(tempJson);
+			retJson.put("ifsuccess", false);
+			
+			//return false;
 		}else if(userList.size()<1)
 		{
 			EntityManagerHelper.log("add meeting failure: cannot find book name", Level.INFO, null);
-			return false;
+			tempJson=new JSONObject();
+			tempJson.put("errortype", "0");
+			tempJson.put("errormsg", "add meeting failure: cannot find book name");
+			mistakeListArray.add(tempJson);
+			retJson.put("ifsuccess", false);
+			//return false;
 		}
 		
-		tempe=eDao.findByName(userList.get(0).getUsername());
+		tempe=eDao.findByUserid(userList.get(0).getUserId());
 		if(tempe.size()>1)
 		{
 			EntityManagerHelper.log("add meeting failure: the book name have several staff id", Level.INFO, null);
-			return false;
-		}else if(tempe.size()<1)
+			tempJson=new JSONObject();
+			tempJson.put("errortype", "0");
+			tempJson.put("errormsg", "add meeting failure: the book name have several staff id");
+			mistakeListArray.add(tempJson);
+			
+			retJson.put("ifsuccess", false);
+			//return false;
+		}
+		else if(tempe.size()<1)
 		{
 			EntityManagerHelper.log("add meeting failure: the book name have no staff id", Level.INFO, null);
-			return false;
+			tempJson=new JSONObject();
+			tempJson.put("errortype", "0");
+			tempJson.put("errormsg", "add meeting failure: the book name have no staff id");
+			mistakeListArray.add(tempJson);
+			
+			retJson.put("ifsuccess", false);
+			//return false;
 		}
 		
 		staffid.add(tempe.get(0).getStaffId());
-		if(!checktimeconflict(startTime,endTime,meetingroom_id)){
+		checkJson=JSONArray.fromObject(checktimeconflict(startTime,endTime,meetingroom_id));
+		if(checkJson.size()>0){
 			EntityManagerHelper.log("add meeting failure: meeting date conflict", Level.INFO, null);
-			return false;
+			
+			tempJson=new JSONObject();
+			tempJson.put("errortype", "1");
+			tempJson.put("errormsg", "add meeting failure: meeting date conflict");
+			tempJson.put("conflictdata", checkJson);
+			mistakeListArray.add(tempJson);
+			retJson.put("ifsuccess", false);
+			//return false;
 		}
-		else if(!checkStaffMeetingConflict(startTime,endTime,staffid))
-		{
+		checkJson=JSONArray.fromObject(checkStaffMeetingConflict(startTime,endTime,staffid));
+		if(checkJson.size()>0){
 			EntityManagerHelper.log("add meeting failure: participant's date conflict", Level.INFO, null);
-			return false;
+			
+			tempJson=new JSONObject();
+			tempJson.put("errortype", "2");
+			tempJson.put("errormsg", "add meeting failure: participant's date conflict");
+			tempJson.put("conflictdata", checkJson);
+			mistakeListArray.add(tempJson);
+			retJson.put("ifsuccess", false);
+			//return false;
 		}
 		
 		
 		int meetingid=meetingDAO.getcount()+1;
 		
 		if(staffid.size()==0){
-			EntityManagerHelper.log("add meeting failure", Level.INFO, null);
-			return false;
+			EntityManagerHelper.log("add meeting failure no staff included.", Level.INFO, null);
+			tempJson=new JSONObject();
+			tempJson.put("errortype", "3");
+			tempJson.put("errormsg", "add meeting failure no staff included");
+			mistakeListArray.add(tempJson);
+			retJson.put("ifsuccess", false);
+			//return false;
 		}
-		else{
+		else
+		{
 			meeting.setMeetingName(meetingname);
 			meeting.setMeetingNotes(meeting_notes);
 			meeting.setMeetingroomId(meetingroom_id);
@@ -757,31 +829,41 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 			meeting.setEndTime(endTime);
 			meeting.setMeetingId(meetingid);
 			meeting.setBookName(bookname);
-			
+				
 			//System.out.println(meeting.getMeetingId());
 			meetingDAO.update(meeting);
-			
-		for(int i=0;i<staffid.size();i++){
+				
+			for(int i=0;i<staffid.size();i++){
 				mRelationStaff.setId(mRelationStaffDAO.getcount()+1);	
 				
-				System.out.println(mRelationStaffDAO.getcount());
+				//System.out.println(mRelationStaffDAO.getcount());
 				
 				mRelationStaff.setStaffId(staffid.get(i));
-				System.out.println(staffid.get(i));
+			//	System.out.println(staffid.get(i));
 				
 				mRelationStaff.setMeetingId(meetingid);
 				//mRelationStaff.setId(mRelationStaffId);
 				//System.out.println(mRelationStaff.getId().getId());
 				mRelationStaffDAO.update(mRelationStaff);
+			}
+			EntityManagerHelper.log("add meeting success", Level.INFO, null);
+			if(retJson.has("ifsuccess")==false)
+			{
+				retJson.put("ifsuccess", true);
+			}else {
+				retJson.put("faillist", mistakeListArray);
+			}
+			//return true;
 		}
-		EntityManagerHelper.log("add meeting success", Level.INFO, null);
-		return true;
-		}
+		return retJson.toString();
 	}
 	
 	
-	boolean checkStaffMeetingConflict(Timestamp startTime, Timestamp endTime,List<Integer>staffid)
+	String checkStaffMeetingConflict(Timestamp startTime, Timestamp endTime,List<Integer>staffid)
 	{
+		JSONArray ret_val=new JSONArray();
+		JSONObject tempJson;
+		
 		MeetingRelationStaffDAO mrsDao=new MeetingRelationStaffDAO();
 		MeetingDAO mDao=new MeetingDAO();
 		List<MeetingRelationStaff> mrsList=new ArrayList<MeetingRelationStaff>();
@@ -822,12 +904,17 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		{
 			if(m.getStartTime().getTime()<lastendtime)
 			{
-				return false;
+				tempJson=new JSONObject();
+				tempJson.put("meetingname", m.getMeetingName());
+				tempJson.put("starttime", m.getStartTime().toString());
+				tempJson.put("endtime", m.getEndTime().toString());
+				//return false;
+				ret_val.add(tempJson);
 			}
 			lastendtime=m.getEndTime().getTime();
 		}
 		
-		return true;
+		return ret_val.toString();
 	}
 	
 	
@@ -899,7 +986,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     	String output="multi search staff name:"+name;
     	output+=" username:"+username;
     	output+=" state:"+(state);
-    	EntityManagerHelper.log(output, Level.INFO, null);
+    	//EntityManagerHelper.log(output, Level.INFO, null);
 		
     	
     	
@@ -979,7 +1066,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 			drsList=drsDAO.findByProperty("departmentId", depart.getDepartmentId());
 			
 			if(drsList.size()==0){
-	    		EntityManagerHelper.log("search staff by department empty.", Level.INFO, null);
+	    	//	EntityManagerHelper.log("search staff by department empty.", Level.INFO, null);
 	    		
 	    	}
 	    	else
@@ -990,7 +1077,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 	    			//empList.add(ed.findById(d.getStaffId()));
 	    			tempVAl.add(ed.findById(d.getStaffId()));
 	    		}
-	    		EntityManagerHelper.log("search staff by department id: "+depart.getDepartmentId()+" information.", Level.INFO, null);
+	    		//EntityManagerHelper.log("search staff by department id: "+depart.getDepartmentId()+" information.", Level.INFO, null);
 	    		
 	    		//tempString+=tempVAl.toString();
 	    		//empList.clear();
@@ -1001,7 +1088,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 	    	}
 			
 		}
-    	System.out.println(ret_val.toString());
+    	//System.out.println(ret_val.toString());
     	return ret_val.toString();
  
     }
@@ -1104,7 +1191,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 			meetings=meetingDAO.findByMultiProperty(meeting_name,people_num,start_time,end_time,meeting_notes,meetingroom_id,status,book_name);
     	
 		} catch (Exception e) {
-			// TODO: handle exception
+			
 			e.printStackTrace();
 		}
     	
@@ -1113,7 +1200,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     	
     	if(meetings.size()>0)
     	{
-    		//DO sth
+    		
     		for(Meeting m:meetings)
     		{
     			ret_val.add(JSONObject.fromObject(m));
@@ -1133,7 +1220,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 			((SimpleDateFormat) sdf).applyPattern("yyyy-MM-dd HH:mm:ss");
 			newDateString=sdf.format(tempDate);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
     	Timestamp timestamp=Timestamp.valueOf(newDateString);
@@ -1141,7 +1228,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     }
 	@Override
 	public String search_meeting_room_by_name(String name) {
-		// TODO Auto-generated method stub
+		
 		JSONArray ret_val=new JSONArray();
 		MeetingRoomDAO mrd=new MeetingRoomDAO();
 		List<MeetingRoom> mrList=new ArrayList<MeetingRoom>();
@@ -1155,7 +1242,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 	}
 	@Override
 	public String search_meeting_room_by_number(String number) {
-		// TODO Auto-generated method stub
+		
 		JSONArray ret_val=new JSONArray();
 		MeetingRoomDAO mrd=new MeetingRoomDAO();
 		List<MeetingRoom> mrList=new ArrayList<MeetingRoom>();
@@ -1171,6 +1258,177 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		return ret_val.toString();
 		
 	}
+	@Override
+	public boolean reverse_staff(int staffid) throws RemoteException {
+		
+		EmployeeDAO eDao=new EmployeeDAO();
+		Employee tempee=null;
+		
+		tempee=eDao.findById(staffid);
+		if(tempee==null)return false;
+		else {
+			tempee.setState(1-tempee.getState());
+		}
+		eDao.update(tempee);
+		return true;
+	}
+	
+	public String search_avaliable_meetingroom(String json)throws RemoteException
+	{
+		JSONObject tempJsonObject=JSONObject.fromObject(json);
+		String starttime=(String)tempJsonObject.get("srarttime");
+		String endtime=(String)tempJsonObject.get("endtime");
+		int nownumber=(int)tempJsonObject.get("nownumber");
+		return search_avaliable_meetingroom(starttime, endtime, nownumber);
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public String search_avaliable_meetingroom(String starttime,String endtime,int nownumber) throws RemoteException {
+		// TODO Auto-generated method stub
+		Timestamp startTimestamp=convertDate(starttime);
+		Timestamp endTimestamp=convertDate(endtime);
+		
+		String rawMeetingRoomString=show_allmeetingroom();
+		
+		
+		MeetingDAO mDao=new MeetingDAO();
+		
+		List<MeetingRoom> mrList=new ArrayList<MeetingRoom>();
+		List<Meeting>	mList=new ArrayList<Meeting>();
+		boolean add_this_mr=true;
+		Meeting tempMeeting=new Meeting();
+		tempMeeting.setStartTime(startTimestamp);
+		tempMeeting.setEndTime(endTimestamp);
+		
+		JSONArray raw_val=JSONArray.fromObject(rawMeetingRoomString);
+		JSONArray ret_val=new JSONArray();
+		mrList=JSONArray.toList(raw_val,MeetingRoom.class);
+		
+		for(MeetingRoom mr:mrList)
+		{
+			add_this_mr=true;
+			mList=mDao.findByMeetingroomId(mr.getMeetingRoomId());
+			mList.add(tempMeeting);
+			mList.sort(new Comparator<Meeting>() {
+				@Override
+				public int compare(Meeting o1, Meeting o2) {
+					long s1time=o1.getStartTime().getTime();
+					long s2time=o2.getStartTime().getTime();
+					if(s1time<s2time)return -1;
+					else if(s1time>s2time)return 1;
+
+					return 0;
+				}
+			});
+			long lastendtime=Long.MIN_VALUE;
+			for(Meeting m:mList)
+			{
+				if(m.getStartTime().getTime()<lastendtime)
+				{
+					add_this_mr=false;
+				}
+				lastendtime=m.getEndTime().getTime();
+			}
+			if(add_this_mr==true)
+			{
+				if(mr.getCurrentAtate().equals("ÆôÓÃ")&&mr.getCapacity()>=nownumber)
+				{
+					ret_val.add(JSONObject.fromObject(mr));
+				}
+				
+			}
+		}
+		
+		return ret_val.toString();
+	}
+	
+	public String search_avaliable_staff(String json)throws RemoteException
+	{
+		JSONObject tempJsonObject=JSONObject.fromObject(json);
+		String starttime=(String)tempJsonObject.get("srarttime");
+		String endtime=(String)tempJsonObject.get("endtime");
+
+		return search_avaliable_staff(starttime, endtime);
+	}
+	
+	@Override
+	public String search_avaliable_staff(String starttime,String endtime) throws RemoteException {
+		// TODO Auto-generated method stub
+		Timestamp startTimestamp=convertDate(starttime);
+		Timestamp endTimestamp=convertDate(endtime);
+		long endT=endTimestamp.getTime();
+		long startT=startTimestamp.getTime();
+		MeetingDAO mDao=new MeetingDAO();
+		EmployeeDAO eDao=new EmployeeDAO();
+		MeetingRelationStaffDAO mrsDao=new MeetingRelationStaffDAO();
+		List<Meeting> mList=mDao.findAll();
+		
+		List<Employee> empList=eDao.findByStatus(0);
+		Map<Integer, Employee> can_use_employeeMap=new HashMap<Integer, Employee>();
+		
+		JSONArray ret_val=new JSONArray();
+		
+		for(Employee e:empList)
+		{
+			can_use_employeeMap.put(e.getStaffId(), e);
+		}
+		
+		
+		mList.sort(new Comparator<Meeting>() {
+			@Override
+			public int compare(Meeting o1, Meeting o2) {
+				long s1time=o1.getStartTime().getTime();
+				long s2time=o2.getStartTime().getTime();
+				if(s1time<s2time)return -1;
+				else if(s1time>s2time)return 1;
+
+				return 0;
+			}
+		});
+		int i=0;
+		Meeting tempm;
+		for(;i<mList.size();i++)
+		{
+			tempm=mList.get(i);
+			if(tempm.getStartTime().getTime()>=endT)
+			{
+				break;
+			}
+		}
+		if(i>=mList.size())
+		{}
+		else {
+			for(;i>=0;i--)
+			{
+				if(mList.get(i).getEndTime().getTime()>startT)
+				{
+					//need to delete staff from emplist who joined this meeting
+					Meeting goalMeeting=mList.get(i);
+					List<MeetingRelationStaff> mrsList;
+					mrsList=mrsDao.findByProperty("meetingId", goalMeeting.getMeetingId());
+					for(MeetingRelationStaff mrs:mrsList)
+					{
+						//mrs.getStaffId();
+						can_use_employeeMap.remove(mrs.getStaffId());
+					}
+					
+				}
+			}
+		}
+		
+		Set<Map.Entry<Integer,Employee>> allSet=can_use_employeeMap.entrySet();
+		Iterator<Map.Entry<Integer, Employee>> iterator=allSet.iterator();
+		while (iterator.hasNext()) {
+			Map.Entry<java.lang.Integer, data.Employee> entry = (Map.Entry<java.lang.Integer, data.Employee>) iterator
+					.next();
+			ret_val.add(entry.getValue());
+		}
+		
+		return ret_val.toString();
+	}
+	
 
 	
 }
