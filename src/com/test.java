@@ -987,21 +987,21 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 	    		tempVAl=new JSONArray();
 	    		for(DepartmentRelationStaff d:drsList)
 	    		{
-	    			empList.add(ed.findById(d.getStaffId()));
+	    			//empList.add(ed.findById(d.getStaffId()));
 	    			tempVAl.add(ed.findById(d.getStaffId()));
 	    		}
 	    		EntityManagerHelper.log("search staff by department id: "+depart.getDepartmentId()+" information.", Level.INFO, null);
 	    		
 	    		//tempString+=tempVAl.toString();
-	    		empList.clear();
+	    		//empList.clear();
+	    		tempJson=new JSONObject();
+	    		tempJson.put("stafflist", tempVAl);
+	    		tempJson.put("department", depart);
+	    		ret_val.add(tempJson);
 	    	}
-			tempJson=new JSONObject();
-			tempJson.put("stafflist", tempVAl);
-			tempJson.put("department", depart);
-			ret_val.add(tempJson);
 			
 		}
-    	
+    	System.out.println(ret_val.toString());
     	return ret_val.toString();
  
     }
@@ -1100,7 +1100,13 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     		meeting_notes+="%";	
     	}
     	
-    	meetings=meetingDAO.findByMultiProperty(meeting_name,people_num,start_time,end_time,meeting_notes,meetingroom_id,status,book_name);
+    	try {
+			meetings=meetingDAO.findByMultiProperty(meeting_name,people_num,start_time,end_time,meeting_notes,meetingroom_id,status,book_name);
+    	
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
     	
     	System.out.println(meetings.get(0).getMeetingName()+" "+meetings.get(0).getBookName());
     	
