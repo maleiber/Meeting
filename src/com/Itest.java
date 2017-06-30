@@ -51,7 +51,7 @@ public interface Itest extends Remote{
 			String meeting_name,String meeting_notes,
 			String book_name,int people_num,
 			int meetingroom_id,int status,
-    		String start_time,String end_time
+    		String start_time,String end_time,String book_time
     		)throws RemoteException;
 			//JSONArray
 	
@@ -92,7 +92,7 @@ public interface Itest extends Remote{
 	
 	public String show_personal_book_meeting(int staffid,String username)throws RemoteException;
 	
-	public boolean checkusername(String username)throws RemoteException;
+	public int checkusername(String username)throws RemoteException;
 	
 	public String search_meeting_room_by_name(String name)throws RemoteException;
 	public String search_meeting_room_by_number(String number)throws RemoteException;

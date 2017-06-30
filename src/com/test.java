@@ -59,7 +59,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 	public boolean regist(String name,String telephone,String email,String position,int departmentid,String username,String password)throws RemoteException{
 	//	List<EmployeeCopy> a=new ArrayList<EmployeeCopy>();
 		
-		if(checkusername(username)){
+		if(checkusername(username)==3){
 		EmployeeCopyDAO b=new EmployeeCopyDAO();
 		int max;
 		max=b.getcount();
@@ -67,7 +67,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		
 		String tmpString="tryto regist no="+(max+1)+"name="+name;
 		EntityManagerHelper.log(tmpString, Level.INFO, null);
-		EmployeeCopy a=new EmployeeCopy(max+1,name,telephone,email,position,1,departmentid,0,username,password);	
+		EmployeeCopy a=new EmployeeCopy(max+1,name,telephone,email,position,1,departmentid,0,username,password,null);	
 	//	a.setEmail(email);a.setLevel(1);a.setName(name);a.setPosition(position);a.setTelephone(telephone);
 		b.update(a);
 		EntityManagerHelper.log("add username success", Level.INFO, null);
@@ -98,22 +98,35 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		return regist(name,telephone,email,position,departmentid,username,password);
 	}
 	
-	public boolean checkusername(String username){
+	public int checkusername(String username){
 		UserDAO mUserDAO=new UserDAO();
 		EmployeeCopyDAO mEmployeeCOPYDAO=new EmployeeCopyDAO();
+		List<EmployeeCopy> ecList=new ArrayList<EmployeeCopy>();
 		if(mUserDAO.findByProperty("username", username).size()>0){
 			EntityManagerHelper.log("username conflict in user data!", Level.INFO, null);
-			return false;
+			//duo user name in passed
+			return 0;
 			
 		}
 		else{
-			if(mEmployeeCOPYDAO.findByProperty("username", username).size()>0){
-				EntityManagerHelper.log("username confilct in employ data", Level.INFO, null);
-				return false;
+			ecList=mEmployeeCOPYDAO.findByProperty("username", username);
+			if(ecList!=null&&ecList.size()>0){
+				for(EmployeeCopy ec:ecList)
+				{
+					if(ec.getCheckStatus()==0)
+					{
+						EntityManagerHelper.log("username confilct in employcopy data:still wait pass", Level.INFO, null);
+						//dai tongguo
+						return 1;
+					}
+				}
+				EntityManagerHelper.log("username confilct in employcopy data: not pass", Level.INFO, null);
+				//wei tongguo
+				return 2;
 			}
 			else{
-			EntityManagerHelper.log("check staff username success", Level.INFO, null);
-		return true;
+				EntityManagerHelper.log("check staff username success: can use", Level.INFO, null);
+				return 3;
 			}
 		}
 	}
@@ -343,25 +356,57 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		List<User> a =new ArrayList<User>();
 		UserDAO b=new UserDAO();
 		EmployeeDAO ed=new EmployeeDAO();
+		EmployeeCopyDAO ecDao=new EmployeeCopyDAO();
+		List<EmployeeCopy> ecList=new ArrayList<EmployeeCopy>();
 		Employee employee;
 		JSONObject tempJsonObject;
 		a=b.findByProperty("username", name);
-		if(a.size()==0)return ""; 
+		if(a==null||a.size()==0)return ""; 
 		//a=b.findByUsername(name);
 		
 		if(password.equals(a.get(0).getPassword())){
 			employee=ed.findByUserid(a.get(0).getUserId()).get(0);
+			if(employee.getState()==1)
+			{
+				EntityManagerHelper.log("login failed: frozen account", Level.INFO, null);
+				ret_val=new JSONObject();
+				ret_val.put("ifsuccess", false);
+				ret_val.put("err", 0);
+				return ret_val.toString();
+			}
 			tempJsonObject=JSONObject.fromObject(employee);
 			tempJsonObject.put("username", name);
 			tempJsonObject.put("password", password);
+			tempJsonObject.put("ifsuccess", true);
 			ret_val= tempJsonObject;
 			EntityManagerHelper.log("login success", Level.INFO, null);
 			return ret_val.toString();
 		}
 		else
 		{
-			EntityManagerHelper.log("login failed", Level.INFO, null);
-			return "";
+			EntityManagerHelper.log("login failed.tryto fin in copy", Level.INFO, null);
+			ecList=ecDao.findByProperty("username", name);
+			for(EmployeeCopy ec:ecList)
+			{
+				if(ec.getCheckStatus()==0)
+				{
+					EntityManagerHelper.log("login failed: wait for pass", Level.INFO, null);
+					ret_val=new JSONObject();
+					ret_val.put("ifsuccess", false);
+					ret_val.put("err", 1);
+					return ret_val.toString();
+				}else {
+					EntityManagerHelper.log("login failed: refuse pass", Level.INFO, null);
+					ret_val=new JSONObject();
+					ret_val.put("ifsuccess", false);
+					ret_val.put("err", 2);
+					return ret_val.toString();
+				}
+			}
+			EntityManagerHelper.log("login failed: refuse pass", Level.INFO, null);
+			ret_val=new JSONObject();
+			ret_val.put("ifsuccess",false);
+			return ret_val.toString();
 		}
 		
 		
@@ -833,6 +878,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 				meeting.setBookName(tempUser.getUsername());
 				Timestamp tempTimestamp= new Timestamp(System.currentTimeMillis()); 
 				meeting.setBookTime(tempTimestamp);
+				meeting.setStatus(0);
 				//System.out.println(meeting.getMeetingId());
 				meetingDAO.update(meeting);
 					
@@ -1178,7 +1224,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     {
     	String meeting_name,meeting_notes,book_name;
 		int people_num=-1,meetingroom_id=-1,status=-1;
-		String sTime,eTime;
+		String sTime,eTime,bTime;
 		JSONObject tempJson=JSONObject.fromObject(jsonString);
 		
 		EntityManagerHelper.log("start search meeting", Level.INFO, null);
@@ -1190,17 +1236,18 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		if(tempJson.get("status")!=null)status=(int)tempJson.get("status");
 		sTime=(String)tempJson.get("starttime");
 		eTime=(String)tempJson.get("endtime");
-		
+		bTime=(String)tempJson.get("booktime");
 		System.out.println(book_name);
-		return searchMeeting(meeting_name, meeting_notes, book_name, people_num, meetingroom_id, status, sTime, eTime);
+		return searchMeeting(meeting_name, meeting_notes, book_name, people_num, meetingroom_id, status, sTime, eTime,bTime);
     }
     
     //multiple
+    @Deprecated
     public String searchMeeting(Map<String, Object> map)throws RemoteException
     {
     	String meeting_name=null,meeting_notes=null, book_name=null;
 		int people_num=-1, meetingroom_id=-1, status=-1;
-		String start_time, end_time;
+		String start_time, end_time , book_time = null;
     	
 		meeting_name=map.get("meeting_name")==null?null:(String)map.get("meeting_name");
 		meeting_notes=map.get("meeting_notes")==null?null:(String)map.get("meeting_notes");
@@ -1218,6 +1265,12 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		}else {
 			end_time=(String)map.get("end_time");
 		}
+		if(map.get("book_time")==null)
+		{
+			book_time="";
+		}else {
+			book_time=(String)map.get("book_time");
+		}
 		
 		
 		people_num=map.get("people_num")==null?-1:(int)map.get("people_num");
@@ -1225,17 +1278,18 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		status=map.get("status")==null?-1:(int)map.get("status");
 		return searchMeeting(meeting_name, meeting_notes, book_name, 
 				people_num, meetingroom_id, status, 
-				start_time, end_time);
+				start_time, end_time, book_time);
     }
     
     //multiple
     public String searchMeeting(String meeting_name,String meeting_notes,String book_name,
     		int people_num,int meetingroom_id,int status,
-    		String sTime,String eTime)throws RemoteException
+    		String sTime,String eTime,String bTime)throws RemoteException
     {
     	
     	Timestamp start_time=null;
     	Timestamp end_time=null;
+    	Timestamp book_time=null;
     	List<Meeting> meetings=new ArrayList<Meeting>();
     	MeetingDAO meetingDAO=new MeetingDAO();
     	Meeting goalmeeting=new Meeting();
@@ -1246,8 +1300,9 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     	}
     	if(sTime!=null&&sTime.length()>0)start_time=convertDate(sTime);
     	if(eTime!=null&&eTime.length()>0)end_time=convertDate(eTime);
+    	if(bTime!=null&&bTime.length()>0)book_time=convertDate(bTime);
     	try {
-			meetings=meetingDAO.findByMultiProperty(meeting_name,people_num,start_time,end_time,meeting_notes,meetingroom_id,status,book_name);
+			meetings=meetingDAO.findByMultiProperty(meeting_name,people_num,start_time,end_time,book_time,meeting_notes,meetingroom_id,status,book_name);
     	
 		} catch (Exception e) {
 			
@@ -1279,6 +1334,8 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     			tempJsonObject=JSONObject.fromObject(m);
     			tempJsonObject.put("starttime", deconvertDate(m.getStartTime()));
     			tempJsonObject.put("endtime", deconvertDate(m.getEndTime()));
+    			if(m.getStatus()==0)tempJsonObject.put("status", "正常");
+    			else tempJsonObject.put("status", "已取消");
     			if(m.getBookTime()!=null)tempJsonObject.put("booktime", deconvertDate(m.getBookTime()));
     			tempmr=mrDao.findById(m.getMeetingroomId());
     			if(tempmr!=null)
@@ -1492,7 +1549,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		EmployeeDAO eDao=new EmployeeDAO();
 		MeetingRelationStaffDAO mrsDao=new MeetingRelationStaffDAO();
 		//get all meeting
-		List<Meeting> mList=mDao.findAll();
+		List<Meeting> mList=mDao.findByStatus(0);
 		//get all normal staff
 		List<Employee> empList=eDao.findByStatus(0);
 		Map<Integer, Employee> can_use_employeeMap=new HashMap<Integer, Employee>();
@@ -1785,12 +1842,12 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 			tempm.setStatus(1);
 			tempm.setCancelNotes(cancel_note);
 			meetingDAO.update(tempm);
-			mrsList=mrsDao.findByProperty("meetingId", meetingid);
-			if(mrsList.size()==0){return true;}
-			for(MeetingRelationStaff mrs:mrsList)
-			{
-				mrsDao.delete(mrs);
-			}
+//			mrsList=mrsDao.findByProperty("meetingId", meetingid);
+//			if(mrsList.size()==0){return true;}
+//			for(MeetingRelationStaff mrs:mrsList)
+//			{
+//				mrsDao.delete(mrs);
+//			}
 		}
 		return true;
 	}
