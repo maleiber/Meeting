@@ -353,6 +353,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 			employee=ed.findByUserid(a.get(0).getUserId()).get(0);
 			tempJsonObject=JSONObject.fromObject(employee);
 			tempJsonObject.put("username", name);
+			tempJsonObject.put("password", password);
 			ret_val= tempJsonObject;
 			EntityManagerHelper.log("login success", Level.INFO, null);
 			return ret_val.toString();
@@ -1694,6 +1695,43 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		tempJson.put("endtime", deconvertDate(endTimestamp));
 		
 		return searchMeeting(tempJson.toString());
+	}
+	@Override
+	public boolean modify_staff(String jsonString) throws RemoteException {
+		// TODO Auto-generated method stub
+		JSONObject tempJsonObject=new JSONObject();
+		int staffid=(int)tempJsonObject.get("staffid");
+		String telepnone=(String)tempJsonObject.get("telephone");
+		String email=(String)tempJsonObject.get("email");
+		String password=(String)tempJsonObject.get("password");
+		User tempUser;
+		UserDAO uDAO=new UserDAO();
+		Employee tempEmployee;
+		EmployeeDAO employeeDAO=new EmployeeDAO();
+		if(telepnone.length()==0&&email.length()==0){}
+		else {
+			tempEmployee=employeeDAO.findById(staffid);
+			if(tempEmployee==null){return false;}
+			else {
+				if(telepnone.length()>0)tempEmployee.setTelephone(telepnone);
+				if(email.length()>0)tempEmployee.setEmail(email);
+				employeeDAO.update(tempEmployee);
+			}
+		}
+		
+		
+		if(password.length()==0)return true;
+		tempUser=uDAO.findById(staffid);
+		if(tempUser==null)
+		{
+			return false;
+			//not found that user
+		}else {
+			tempUser.setPassword(password);
+			uDAO.update(tempUser);
+			
+		}
+		return true;
 	}
 	
 
