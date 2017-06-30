@@ -65,7 +65,7 @@ public interface Itest extends Remote{
 	public String show_department()throws RemoteException;//JSONArray
 	
 	public String add_meeting(
-			String bookname,String meetingname,
+			int bookid,String meetingname,
 			int meeting_num,String meeting_notes,
 			int meetingroom_id,
 			String startTime, String endTime,
@@ -89,7 +89,9 @@ public interface Itest extends Remote{
 	public String show_allmeetingroom()throws RemoteException;//JSONArray
 	public String show_meetingroom(int meetingroomid)throws RemoteException;//JSONObject
 	public String show_personal_meeting(int staffid)throws RemoteException;//JSONArray
+	
 	public String show_personal_book_meeting(int staffid,String username)throws RemoteException;
+	
 	public boolean checkusername(String username)throws RemoteException;
 	
 	public String search_meeting_room_by_name(String name)throws RemoteException;
@@ -101,5 +103,8 @@ public interface Itest extends Remote{
 	public String search_avaliable_meetingroom(String starttime,String endtime,int nownumber)throws RemoteException;
 	public String search_avaliable_staff(String starttime,String endtime)throws RemoteException;
 	public String search_avaliable_staff(String json)throws RemoteException;
+	public boolean checkbooker_time_conflict(String jsonString)throws RemoteException;
+	public String search_future_7daysMeeting(String bookname)throws RemoteException;
+	public String search_meeting_by_staff(int staffid)throws RemoteException;
 	
 }
