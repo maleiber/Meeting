@@ -1733,8 +1733,26 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		}
 		return true;
 	}
-	
-
+	@Override
+	public boolean cancel_meeting(int meetingid) throws RemoteException {
+		// TODO Auto-generated method stub
+		MeetingDAO meetingDAO=new MeetingDAO();
+		MeetingRelationStaffDAO mrsDao=new MeetingRelationStaffDAO();
+		Meeting tempm=null;
+		List<MeetingRelationStaff> mrsList=new ArrayList<MeetingRelationStaff>();
+		tempm=meetingDAO.findById(meetingid);
+		if(tempm==null){return false;}
+		else {
+			meetingDAO.delete(tempm);
+			mrsList=mrsDao.findByProperty("meetingId", meetingid);
+			if(mrsList.size()==0){return true;}
+			for(MeetingRelationStaff mrs:mrsList)
+			{
+				mrsDao.delete(mrs);
+			}
+		}
+		return true;
+	}
 	
 }
 
