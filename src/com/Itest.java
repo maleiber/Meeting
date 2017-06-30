@@ -105,8 +105,13 @@ public interface Itest extends Remote{
 	public String search_avaliable_staff(String json)throws RemoteException;
 	public boolean checkbooker_time_conflict(String jsonString)throws RemoteException;
 	public String search_future_7daysMeeting(String bookname)throws RemoteException;
+	public String search_future_meeting(String bookname)throws RemoteException ;
 	public String search_meeting_by_staff(int staffid)throws RemoteException;
 	public boolean modify_staff(String jsonString)throws RemoteException;
 	
 	public boolean cancel_meeting(int meetingid)throws RemoteException;
+	
+	public boolean cancel_meeting(String jsonString)throws RemoteException;
+	public String search_meeting_by_staff(String jsonString) throws RemoteException;
+	
 }
