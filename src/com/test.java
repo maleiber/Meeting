@@ -104,7 +104,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		List<EmployeeCopy> ecList=new ArrayList<EmployeeCopy>();
 		if(mUserDAO.findByProperty("username", username).size()>0){
 			EntityManagerHelper.log("username conflict in user data!", Level.INFO, null);
-			//duo user name in passed
+			//duo user name already exist in user
 			return 0;
 			
 		}
@@ -361,10 +361,38 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		Employee employee;
 		JSONObject tempJsonObject;
 		a=b.findByProperty("username", name);
-		if(a==null||a.size()==0)return ""; 
-		//a=b.findByUsername(name);
-		
-		if(password.equals(a.get(0).getPassword())){
+		if(a==null||a.size()==0)  //can't found username in user
+		{
+			EntityManagerHelper.log("login failed.tryto fin in copy", Level.INFO, null);
+			ecList=ecDao.findByProperty("username", name);
+			if(ecList==null||ecList.size()==0)
+			{ //wrong username
+				EntityManagerHelper.log("login failed: wrong password or username", Level.INFO, null);
+				ret_val=new JSONObject();
+				ret_val.put("ifsuccess",false);
+				ret_val.put("err", 3);
+				return ret_val.toString();
+			}
+			for(EmployeeCopy ec:ecList)//for exist user in employee copy
+			{
+				if(ec.getCheckStatus()==0)//if wait for pass
+				{
+					EntityManagerHelper.log("login failed: wait for pass", Level.INFO, null);
+					ret_val=new JSONObject();
+					ret_val.put("ifsuccess", false);
+					ret_val.put("err", 1);
+					return ret_val.toString();
+				}
+				
+			}
+			//if has been refused
+			EntityManagerHelper.log("login failed: refuse pass", Level.INFO, null);
+			ret_val=new JSONObject();
+			ret_val.put("ifsuccess",false);
+			ret_val.put("err", 2);
+			return ret_val.toString();
+		}
+		else if(password.equals(a.get(0).getPassword())){
 			employee=ed.findByUserid(a.get(0).getUserId()).get(0);
 			if(employee.getState()==1)
 			{
@@ -383,29 +411,11 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 			return ret_val.toString();
 		}
 		else
-		{
-			EntityManagerHelper.log("login failed.tryto fin in copy", Level.INFO, null);
-			ecList=ecDao.findByProperty("username", name);
-			for(EmployeeCopy ec:ecList)
-			{
-				if(ec.getCheckStatus()==0)
-				{
-					EntityManagerHelper.log("login failed: wait for pass", Level.INFO, null);
-					ret_val=new JSONObject();
-					ret_val.put("ifsuccess", false);
-					ret_val.put("err", 1);
-					return ret_val.toString();
-				}else {
-					EntityManagerHelper.log("login failed: refuse pass", Level.INFO, null);
-					ret_val=new JSONObject();
-					ret_val.put("ifsuccess", false);
-					ret_val.put("err", 2);
-					return ret_val.toString();
-				}
-			}
-			EntityManagerHelper.log("login failed: refuse pass", Level.INFO, null);
+		{ //wrong password
+			EntityManagerHelper.log("login failed: wrong password or username", Level.INFO, null);
 			ret_val=new JSONObject();
 			ret_val.put("ifsuccess",false);
+			ret_val.put("err", 3);
 			return ret_val.toString();
 		}
 		
@@ -1320,9 +1330,16 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 				public int compare(Meeting o1, Meeting o2) {
 					long s1time=o1.getStartTime().getTime();
 					long s2time=o2.getStartTime().getTime();
-					if(s1time<s2time)return -1;
-					else if(s1time>s2time)return 1;
-					return 0;
+					if(o1.getStatus()<o2.getStatus()){
+						return -1;
+					}else if(o1.getStatus()>o2.getStatus()){
+						return 1;
+					}else{
+						if(s1time<s2time)return -1;
+						else if(s1time>s2time)return 1;
+						return 0;
+					}
+					
 				}
 			});
     		
@@ -1334,8 +1351,8 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     			tempJsonObject=JSONObject.fromObject(m);
     			tempJsonObject.put("starttime", deconvertDate(m.getStartTime()));
     			tempJsonObject.put("endtime", deconvertDate(m.getEndTime()));
-    			if(m.getStatus()==0)tempJsonObject.put("status", "正常");
-    			else tempJsonObject.put("status", "已取消");
+    			if(m.getStatus()==0)tempJsonObject.put("status", "脮媒鲁拢");
+    			else tempJsonObject.put("status", "脪脩脠隆脧没");
     			if(m.getBookTime()!=null)tempJsonObject.put("booktime", deconvertDate(m.getBookTime()));
     			tempmr=mrDao.findById(m.getMeetingroomId());
     			if(tempmr!=null)
@@ -1518,7 +1535,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 			}
 			if(add_this_mr==true)
 			{
-				if(mr.getCurrentAtate().equals("启用")&&mr.getCapacity()>=nownumber)
+				if(mr.getCurrentAtate().equals("脝么脫脙")&&mr.getCapacity()>=nownumber)
 				{
 					ret_val.add(JSONObject.fromObject(mr));
 				}
