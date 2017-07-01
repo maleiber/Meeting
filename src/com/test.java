@@ -1783,6 +1783,31 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		return searchMeeting(tempJson.toString());
 	}
 	
+	@Override
+	public boolean redistribute_department_of_staff(String jsonString)throws RemoteException
+	{
+		//TODO
+		JSONObject tempJsonObject=JSONObject.fromObject(jsonString);
+		//List<Integer> staffid=new ArrayList<Integer>();
+		//List<Integer> departmentid=new ArrayList<Integet>();
+		JSONArray rawstaffid=(JSONArray)tempJsonObject.get("staffid");
+		JSONArray rawdepartmentid=(JSONArray)tempJsonObject.get("departmentid");
+		DepartmentRelationStaffDAO drsDao=new DepartmentRelationStaffDAO();
+		List<DepartmentRelationStaff> drsList;
+		DepartmentRelationStaff tempdrs;
+		if(rawstaffid==null||rawstaffid.size()==0)return false;
+		for(int i=0;i<rawstaffid.size();i++)
+		{
+			drsList=drsDao.findByStaffId(Integer.parseInt(rawstaffid.get(i)));
+			if(drsList!=null&&drsList.size()>0)
+			{
+				tempdrs=drsList.get(0);
+				tempdrs.setDepartmentId(Integer.parseInt(rawdepartmentid.get(i)));
+				drsDao.update(tempdrs);
+			}else return false;
+		}
+		return true;
+	}
 	
 	@Override
 	public boolean modify_staff(String jsonString) throws RemoteException {
@@ -1797,6 +1822,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		UserDAO uDAO=new UserDAO();
 		Employee tempEmployee;
 		EmployeeDAO employeeDAO=new EmployeeDAO();
+		
 		if((telepnone==null||telepnone.length()==0)&&(email.length()==0||email==null)){}
 		else {
 			tempEmployee=employeeDAO.findById(staffid);
