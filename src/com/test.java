@@ -1,11 +1,16 @@
 package com;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.rmi.AccessException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -22,9 +27,13 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialException;
+import javax.swing.JApplet;
 
 import org.eclipse.persistence.jaxb.javamodel.JavaAnnotation;
 
+import com.mysql.jdbc.Blob;
 import com.sun.glass.ui.Size;
 import com.sun.javafx.util.TempState;
 import com.sun.org.apache.bcel.internal.generic.I2F;
@@ -38,6 +47,8 @@ import data.*;
 import javafx.util.Pair;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
 
 
 public class test extends UnicastRemoteObject implements Itest,Serializable{  
@@ -88,6 +99,7 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		String name,telephone,email,position;
 		int departmentid;
 		String username,password;
+		
 		name=(String)tempJson.get("name");
 		telephone=(String)tempJson.get("telephone");
 		email=(String)tempJson.getString("email");
@@ -95,6 +107,8 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		departmentid=(int)tempJson.get("departmentid");
 		username=(String)tempJson.get("username");
 		password=(String)tempJson.get("password");
+		
+		
 		//(String name,String telephone,String email,String position,int departmentid,String username,String password)
 		return regist(name,telephone,email,position,departmentid,username,password);
 	}
@@ -405,6 +419,13 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 			}
 			tempJsonObject=JSONObject.fromObject(employee);
 			tempJsonObject.put("username", name);
+			try {
+				tempJsonObject.put("name",URLEncoder.encode(employee.getName(),"UTF-8"));
+				tempJsonObject.put("position",URLEncoder.encode(employee.getPosition(),"UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			tempJsonObject.put("password", password);
 			tempJsonObject.put("ifsuccess", true);
 		//	employee.getStaffId();
@@ -1087,27 +1108,28 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     	}
     }
     
-    public String getstafftotal()throws RemoteException
+    public int getstafftotal(int status)throws RemoteException
     {
     	EmployeeDAO eDao=new EmployeeDAO();
-    	String tempstrString="";
-    	tempstrString+=eDao.gettotal();
-    	return tempstrString;
+    	return eDao.gettotal(status);
     }
     
     public String searchstaff(String jsonString)throws RemoteException
     {
     	String name="",username="";
-    	int state=-1;
+    	int state=3;
     	int pageNo=0, pagesize=Integer.MAX_VALUE;
+    	int fun=1;
     	JSONObject tempJson=JSONObject.fromObject(jsonString);
     	JSONArray ret_val=new JSONArray();
+    	JSONObject fun_ret_val=new JSONObject();
     	
     	name=(String)tempJson.get("name");
     	username=(String)tempJson.get("username");
     	state=(int)tempJson.get("state");
     	if(tempJson.get("pageno")!=null)pageNo=(int)tempJson.get("pageno");
     	if(tempJson.get("pagesize")!=null)pagesize=(int)tempJson.get("pagesize");
+    	if(tempJson.get("fun")!=null)fun=(int)tempJson.get("fun");
     	List<Employee> empList=new ArrayList<Employee>();
     	//List<EmployeeCopy> empCopyList=new ArrayList<EmployeeCopy>();
     	EmployeeDAO empDao=new EmployeeDAO();
@@ -1139,8 +1161,6 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     			if(tempUser==null)continue;
     			nowJson=JSONObject.fromObject(ec);
     			nowJson.put("username", tempUser.getUsername());
-    			nowJson.put("total", getstafftotal());
-    			nowJson.put("pageno", pageNo);
     			ret_val.add(nowJson);
     		}
     		
@@ -1171,12 +1191,17 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
     			if(tempUser==null)continue;
     			nowJson=JSONObject.fromObject(ec);
     			nowJson.put("username", tempUser.getUsername());
-    			nowJson.put("total", getstafftotal());
-    			nowJson.put("pageno", pageNo);
     			ret_val.add(nowJson);
     		}
 		}
     	EntityManagerHelper.log("staff multisearch done with member:"+ret_val.size(), Level.INFO, null);
+    	if(fun==0)
+    	{
+    		fun_ret_val.put("total", getstafftotal(state));
+    		fun_ret_val.put("rows", ret_val);
+    		return fun_ret_val.toString();
+    	}
+    	
     	return  ret_val.toString();
     }
     
@@ -1869,14 +1894,28 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		DepartmentRelationStaffDAO drsDao=new DepartmentRelationStaffDAO();
 		List<DepartmentRelationStaff> drsList;
 		DepartmentRelationStaff tempdrs;
+		DepartmentDAO ddao=new DepartmentDAO();
+		Department tmpDepartment;
+		int tempi=0;
 		if(rawstaffid==null||rawstaffid.size()==0)return false;
 		for(int i=0;i<rawstaffid.size();i++)
 		{
-			drsList=drsDao.findByProperty("staffId", (Integer.parseInt((String)rawstaffid.get(i))));
+			tempi=(int) rawstaffid.get(i);
+			drsList=drsDao.findByProperty("staffId", rawstaffid.get(i));
 			if(drsList!=null&&drsList.size()>0)
 			{
 				tempdrs=drsList.get(0);
-				tempdrs.setDepartmentId(Integer.parseInt((String)rawdepartmentid.get(i)));
+				tmpDepartment=ddao.findById(tempdrs.getDepartmentId());
+				tmpDepartment.setDepartmentNum(tmpDepartment.getDepartmentNum()-1);
+				ddao.update(tmpDepartment);
+				tempi=(int) rawdepartmentid.get(i);
+				
+				tempdrs.setDepartmentId(tempi);
+				
+				tmpDepartment=ddao.findById(tempi);
+				tmpDepartment.setDepartmentNum(tmpDepartment.getDepartmentNum()+1);
+				ddao.update(tmpDepartment);
+				
 				drsDao.update(tempdrs);
 			}else return false;
 		}
@@ -1892,18 +1931,23 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		String telepnone=(String)tempJsonObject.get("telephone");
 		String email=(String)tempJsonObject.get("email");
 		String password=(String)tempJsonObject.get("password");
+		String base=(String)tempJsonObject.get("avatar");
+		byte[] avatar=null;
 		User tempUser;
 		UserDAO uDAO=new UserDAO();
 		Employee tempEmployee;
 		EmployeeDAO employeeDAO=new EmployeeDAO();
-		
-		if((telepnone==null||telepnone.length()==0)&&(email.length()==0||email==null)){}
+		if((telepnone==null||telepnone.length()==0)&&(email.length()==0||email==null)&&(base==null||base.length()==0)){}
 		else {
 			tempEmployee=employeeDAO.findById(staffid);
 			if(tempEmployee==null){return false;}
 			else {
 				if(telepnone.length()>0)tempEmployee.setTelephone(telepnone);
 				if(email.length()>0)tempEmployee.setEmail(email);
+				if(base.length()>0){
+					avatar=base.getBytes();
+					tempEmployee.setAvatar(avatar);
+				}
 				employeeDAO.update(tempEmployee);
 			}
 		}
@@ -2027,5 +2071,20 @@ public class test extends UnicastRemoteObject implements Itest,Serializable{
 		
 		return ret_val.toString();
 	}
+	@Override
+	public String get_avatar(int staffid) throws RemoteException {
+		// TODO Auto-generated method stub
+		EmployeeDAO eDao=new EmployeeDAO();
+		Employee tempe=null;
+		byte[] avatar=null;
+		tempe=eDao.findById(staffid);
+		if(tempe==null)return "";
+		avatar=tempe.getAvatar();
+		if(avatar==null)return "";
+		String ret_val=new String(avatar);
+		return ret_val;
+	}
+	
+	
 	
 }
